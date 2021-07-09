@@ -15,13 +15,13 @@ class Modal extends Component {
 
   handleKeyDown = event => {
     if (event.code === 'Escape') {
-      this.props.toggleModal();
+      this.props.closeModal();
     }
   };
 
   handleOnOverlayClick = event => {
     if (event.target === event.currentTarget) {
-      this.props.toggleModal();
+      this.props.closeModal();
     }
   };
 

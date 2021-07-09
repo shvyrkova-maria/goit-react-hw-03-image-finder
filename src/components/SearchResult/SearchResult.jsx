@@ -4,9 +4,7 @@ import ImageGallery from 'components/ImageGallery/ImageGallery';
 import Button from 'components/Button/Button';
 import Notification from 'components/Notification/Notification';
 import Modal from 'components/Modal/Modal';
-import FetchImagesApi from 'services/pixabayApi';
-
-const fetchImagesApi = new FetchImagesApi();
+import fetchImages from 'services/pixabayApi';
 
 const Status = {
   IDLE: 'idle',
@@ -19,18 +17,22 @@ class SearchResult extends Component {
   state = {
     status: Status.IDLE,
     images: [],
-    showModal: false,
-    activeImage: {},
+    activeImage: null,
     error: null,
   };
 
   componentDidUpdate(prevProps, prevState) {
     const prevSearchQuery = prevProps.searchQuery;
     const newSearchQuery = this.props.searchQuery;
+    const prevPage = prevProps.page;
+    const newPage = this.props.page;
 
     if (prevSearchQuery !== newSearchQuery) {
       this.setState({ images: [] });
-      fetchImagesApi.resetPage();
+      this.fetchImagesOnClick();
+    }
+
+    if (prevPage !== newPage && this.props.page !== 1) {
       this.fetchImagesOnClick();
     }
   }
@@ -38,8 +40,7 @@ class SearchResult extends Component {
   fetchImagesOnClick = () => {
     this.setState({ status: Status.PENDING });
 
-    fetchImagesApi
-      .fetchImages(this.props.searchQuery)
+    fetchImages(this.props.searchQuery, this.props.page)
       .then(({ hits }) => {
         if (hits.length === 0) {
           // this.setState({
@@ -59,23 +60,16 @@ class SearchResult extends Component {
       });
   };
 
-  toggleModal = () => {
-    this.setState(({ showModal }) => ({ showModal: !showModal }));
+  resetActiveImage = () => {
+    this.setState({ activeImage: null });
   };
 
-  handleImageClick = event => {
-    this.toggleModal();
-
-    const activeImage = this.state.images.find(
-      image => image.id === +event.target.id,
-    );
-
+  handleImageClick = activeImage => {
     this.setState({ activeImage });
   };
 
   render() {
-    const { images, error, status, activeImage, showModal } = this.state;
-    const { id, largeImageURL, tags } = activeImage;
+    const { images, error, status, activeImage } = this.state;
 
     if (status === Status.IDLE) return <></>;
     if (status === Status.PENDING) return <Spinner />;
@@ -84,10 +78,14 @@ class SearchResult extends Component {
       return (
         <>
           <ImageGallery images={images} onImageClick={this.handleImageClick} />
-          <Button onClick={this.fetchImagesOnClick} />
-          {showModal && (
-            <Modal toggleModal={this.toggleModal}>
-              <img id={id} src={largeImageURL} alt={tags} />
+          <Button onClick={this.props.onClick} />
+          {activeImage && (
+            <Modal closeModal={this.resetActiveImage}>
+              <img
+                id={activeImage.id}
+                src={activeImage.largeImageURL}
+                alt={activeImage.tags}
+              />
             </Modal>
           )}
         </>

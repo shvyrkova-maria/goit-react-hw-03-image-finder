@@ -6,17 +6,30 @@ import SearchResult from 'components/SearchResult/SearchResult';
 class App extends Component {
   state = {
     searchQuery: '',
+    page: 1,
   };
 
   handleSubmitForm = value => {
-    this.setState({ searchQuery: value });
+    this.setState({ searchQuery: value, page: 1 });
+  };
+
+  handleButtonClick = () => {
+    this.setState(({ page }) => ({
+      page: page + 1,
+    }));
   };
 
   render() {
+    const { handleSubmitForm, handleButtonClick } = this;
+    const { searchQuery, page } = this.state;
     return (
       <>
-        <Searchbar onSubmit={this.handleSubmitForm} />
-        <SearchResult searchQuery={this.state.searchQuery} />
+        <Searchbar onSubmit={handleSubmitForm} />
+        <SearchResult
+          searchQuery={searchQuery}
+          onClick={handleButtonClick}
+          page={page}
+        />
       </>
     );
   }
