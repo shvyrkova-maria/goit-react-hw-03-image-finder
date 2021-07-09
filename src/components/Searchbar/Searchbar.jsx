@@ -1,4 +1,5 @@
 import { Component } from 'react';
+import PropTypes from 'prop-types';
 import {
   Header,
   SearchForm,
@@ -11,6 +12,11 @@ const INITIAL_STATE = {
 };
 
 class Searchbar extends Component {
+  static propTypes = {
+    toast: PropTypes.func.isRequired,
+    onSubmit: PropTypes.func.isRequired,
+  };
+
   state = {
     ...INITIAL_STATE,
   };
@@ -22,12 +28,13 @@ class Searchbar extends Component {
   handleSubmit = event => {
     event.preventDefault();
     const { value } = this.state;
+    const { toast, onSubmit } = this.props;
 
     if (value.trim() === '') {
-      alert('Type a keyword to start searching images');
+      toast.error('Type a keyword to start searching images');
     }
 
-    this.props.onSubmit(value);
+    onSubmit(value);
     this.formReset();
   };
 
